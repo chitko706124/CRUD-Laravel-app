@@ -6,6 +6,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use PhpParser\Node\Expr\Cast\Object_;
+use PHPUnit\Framework\MockObject\Builder\Stub;
 
 class AuthController extends Controller
 {
@@ -24,11 +25,12 @@ class AuthController extends Controller
         ]);
 
         $verify_code = rand(100, 999);
-        logger("Your verify code is " . $verify_code);
+        logger("verify code of " . $request->email . " is " . $verify_code);
 
         $student = new Student();
         $student->name = $request->name;
         $student->email = $request->email;
+        $student->user_token = bcrypt($verify_code);
         $student->verify_code = $verify_code;
         $student->password = Hash::make($request->password);
         $student->save();
@@ -63,6 +65,7 @@ class AuthController extends Controller
             'email' => $student->email,
             'password' => $student->password,
             'verify_code' => $student->verify_code,
+            'user_token' => $student->user_token,
             'email_verified_at' => $student->email_verified_at,
             'created_at' => $student->created_at,
             'updated_at' => $student->updated_at
@@ -139,5 +142,46 @@ class AuthController extends Controller
 
 
         return redirect()->route("dashboard.home");
+    }
+
+    public function forgot()
+    {
+        return view("auth.forgot-password");
+    }
+
+    public function checkMail(Request $request)
+    {
+
+        $request->validate([
+            "email" => "required|exists:students,email"
+        ]);
+        $student = Student::where("email", $request->email)->first();
+        $link = route("auth.newPassword", ["user_token" => $student->user_token]);
+        return redirect()->back()->with("link", $link);
+    }
+
+    public function newPassword()
+    {
+        $user_token = request()->user_token;
+        $student = Student::where("user_token", $user_token)->first();
+        if (is_null($student)) {
+            return abort(403, "you are not allowed");
+        }
+
+        return view("auth.new-password", ["user_token" => $user_token]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            "user_token" => "required|exists:students,user_token",
+            "password" => "required|confirmed"
+        ]);
+
+        $student = Student::where("user_token", $request->user_token)->first();
+        $student->password = Hash::make($request->password);
+        $student->user_token = bcrypt(rand(1000, 9999));
+        $student->update();
+        return redirect()->route("auth.login")->with("message", "Password reset successful");
     }
 }

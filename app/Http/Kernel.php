@@ -2,6 +2,9 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ApiAuthenticated;
+use App\Http\Middleware\SetAcceptApplicationJson;
+use App\Http\Middleware\SetBearerToken;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -40,8 +43,9 @@ class Kernel extends HttpKernel
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            SetAcceptApplicationJson::class
         ],
     ];
 
@@ -64,5 +68,7 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'authenticated' => ApiAuthenticated::class,
+        'bearerToken' => SetBearerToken::class
     ];
 }

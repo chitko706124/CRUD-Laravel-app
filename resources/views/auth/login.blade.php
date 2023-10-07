@@ -15,14 +15,14 @@
         </div>
     @endif
 
-    <form action="{{ route("auth.check") }}" method="POST">
+    <form action="{{ route('auth.check') }}" method="POST">
         @csrf
 
 
         <div class=" my-3">
             <label class=" form-label" for="">Email</label>
             <input class=" form-control @error('email') is-invalid @enderror" type="email" name="email"
-                value="{{ old("email")}}">
+                value="{{ old('email') }}">
             @error('email')
                 <div id="validationServer03Feedback" class="invalid-feedback">
                     {{ $message }}
@@ -43,5 +43,7 @@
 
 
         <button class=" btn btn-primary mt-3">Login</button>
+        <a href="{{ route('auth.forgot') }}" class=" btn-link">Forgot Password</a>
     </form>
+    
 @endsection

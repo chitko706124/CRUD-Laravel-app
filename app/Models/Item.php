@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Student extends Model
+class Item extends Model
 {
     use HasFactory;
-    protected $hidden = ["password", "user_token", "verify_code", "api_token"];
 }
